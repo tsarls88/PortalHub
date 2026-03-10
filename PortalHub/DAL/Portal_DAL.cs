@@ -9,7 +9,7 @@ namespace PortalHub.DAL
 {
     public class Portal_DAL
     {
-     private readonly string _connectionString;
+     private readonly string _connectionString = "";
 
         public Portal_DAL(IConfiguration configuration)
         {
@@ -17,25 +17,49 @@ namespace PortalHub.DAL
         }
 
 
-        public List<PortalhubModel> GetPortalhubModels() { 
-            List<PortalhubModel> portalList = new List<PortalhubModel> (); 
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = connection.CreateCommand();
-                command.CommandType = CommandType.Text;
-                command.CommandText = "SELECT Id, AppName, AppUrl, IconClass, IsActive FROM PortalhubModel WHERE IsActive = 1";
+        public List<PortalhubModel> GetPortalhubModels()
+        {
+            
+            List<PortalhubModel> portalList = new List<PortalhubModel>();
 
-                connection.Open();
-                SqlDataReader dr = command.ExecuteReader();
-                while (dr.Read()) {
-                    portalList.Add(new PortalhubModel {
-                        Id = Convert.ToInt32(dr["ID"]),
-                        AppName = dr["AppName"].ToString(),
-                        AppUrl = dr["AppUrl"].ToString(),
-                        IconClass  = dr["IconClass"].ToString()
-                    });
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                  
+                    string query = "SELECT Id, AppName, AppUrl, IconClass FROM PortalApps WHERE IsActive = 1";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        connection.Open();
+                        using (SqlDataReader dr = command.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                portalList.Add(new PortalhubModel
+                                {
+                                    Id = Convert.ToInt32(dr["Id"]),
+                                    AppName = dr["AppName"]?.ToString(),
+                                    Description = dr["Description"]?.ToString(),
+                                    AppUrl = dr["AppUrl"]?.ToString(),
+                                    IconClass = dr["IconClass"]?.ToString(),
+                                    
+                                    DisplayOrder = dr["DisplayOrder"] != DBNull.Value ? Convert.ToInt32(dr["DisplayOrder"]) : 0,
+                                    
+                                    IsActive = Convert.ToBoolean(dr["IsActive"]),
+                                    CreatedDate = dr["CreatedDate"] != DBNull.Value ? Convert.ToDateTime(dr["CreatedDate"]) : null
+                                });
+                            }
+                        }
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                // Debugging: This prints to the Visual Studio Output window
+                System.Diagnostics.Debug.WriteLine("Database Error: " + ex.Message);
+            }
+
             return portalList;
         }
 

@@ -1,0 +1,22 @@
+﻿@model IEnumerable<PortalHub.Models.PortalhubModel>
+
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var app in Model)
+        {
+            <div class="col-md-4">
+                <h3>@app.AppName</h3>
+            </div>
+        }
+    }
+    else
+
+    {
+        <div class="alert alert-info text-center">
+            <h4>No Apps Found!</h4>
+            <p>The database returned 0 active applications.</p>
+        </div>
+    }
+</div>
