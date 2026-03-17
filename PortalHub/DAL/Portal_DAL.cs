@@ -1,33 +1,29 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient; // Ensure you have this NuGet package
 using System.Data;
 using PortalHub.Models;
-using System.Runtime.InteropServices;
-
 
 namespace PortalHub.DAL
-
 {
     public class Portal_DAL
     {
-     private readonly string _connectionString = "";
+        private readonly string _connectionString;
 
         public Portal_DAL(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            // Retrieves the connection string we verified in your appsettings.json
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? "";
         }
-
 
         public List<PortalhubModel> GetPortalhubModels()
         {
-            
             List<PortalhubModel> portalList = new List<PortalhubModel>();
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                  
-                    string query = "SELECT Id, AppName, AppUrl, IconClass FROM PortalApps WHERE IsActive = 1";
+                    // Define the query string clearly
+                    string query = "SELECT Id, AppName, Description, AppUrl, IconClass, DisplayOrder, IsActive, CreatedDate FROM PortalApps";
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
@@ -38,14 +34,13 @@ namespace PortalHub.DAL
                             {
                                 portalList.Add(new PortalhubModel
                                 {
+                                    // Match the SQL column names exactly
                                     Id = Convert.ToInt32(dr["Id"]),
                                     AppName = dr["AppName"]?.ToString(),
                                     Description = dr["Description"]?.ToString(),
                                     AppUrl = dr["AppUrl"]?.ToString(),
                                     IconClass = dr["IconClass"]?.ToString(),
-                                    
                                     DisplayOrder = dr["DisplayOrder"] != DBNull.Value ? Convert.ToInt32(dr["DisplayOrder"]) : 0,
-                                    
                                     IsActive = Convert.ToBoolean(dr["IsActive"]),
                                     CreatedDate = dr["CreatedDate"] != DBNull.Value ? Convert.ToDateTime(dr["CreatedDate"]) : null
                                 });
@@ -56,14 +51,11 @@ namespace PortalHub.DAL
             }
             catch (Exception ex)
             {
-                // Debugging: This prints to the Visual Studio Output window
+                // This helps us find the exact issue in the 'Output' window if the connection fails
                 System.Diagnostics.Debug.WriteLine("Database Error: " + ex.Message);
             }
 
             return portalList;
         }
-
     }
-
-
 }

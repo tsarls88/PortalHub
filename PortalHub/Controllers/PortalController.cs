@@ -16,12 +16,15 @@ namespace PortalHub.Controllers
 
         public IActionResult Portal()
         {
-            //var testData = new List<PortalhubModel> {
-            //  new PortalhubModel { AppName = "Test App", AppUrl = "http://google.com", IconClass="bi-globe" } 
-            //};
-    
-            //return View(testData);
+            // Fetch data from DAL
             var portalApps = _dal.GetPortalhubModels();
+
+            // Ensure portalApps is never null before sending to the View
+            if (portalApps == null)
+            {
+                portalApps = new List<PortalhubModel>();
+            }
+
             return View(portalApps);
         }
     }
